@@ -1,2 +1,20 @@
 psycopg2
 python-dotenv
+fastapi
+uvicorn[standard]
+psycopg2-binary
+requests
+sqlalchemy
+pydantic
+
+# Optional: for pretty logging/debugging
+loguru
+
+# If you're planning tests later
+pytest
+
+# Airflow (optional – include only if using Airflow locally)
+# apache-airflow==2.7.3  # uncomment if needed
+
+# PySpark (used outside Docker in spark_profiler.py)
+pyspark

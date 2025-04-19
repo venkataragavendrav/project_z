@@ -1,19 +1,17 @@
-import psycopg2
+from backend.service.db_utils import get_db_connection
 
 def execute_sql_file(file_path):
     with open(file_path, 'r') as file:
         sql = file.read()
 
-    conn = psycopg2.connect(
-        dbname="project_z",
-        user="username",
-        password="password",
-        host="localhost",
-        port="5432"
-    )
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute(sql)
-    conn.commit()
+    try:
+        cursor.execute(sql)
+        conn.commit()
+    except Exception as e:
+        print("❌ Error running SQL:", e)
+
     cursor.close()
     conn.close()
     print("Tables created successfully.")

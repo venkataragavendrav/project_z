@@ -4,11 +4,11 @@ import os
 load_dotenv()
 
 DB_CONFIG = {
-    "dbname": os.getenv("DB_NAME"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD"),
-    "host": os.getenv("DB_HOST"),
-    "port": os.getenv("DB_PORT")
+    "POSTGRES_DB": os.getenv("POSTGRES_DB"),
+    "POSTGRES_USER": os.getenv("POSTGRES_USER"),
+    "POSTGRES_PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+    "POSTGRES_HOST": os.getenv("POSTGRES_HOST"),
+    "POSTGRES_PORT": os.getenv("POSTGRES_PORT")
 }
 
 SLACK_WEBHOOK = os.getenv("SLACK_WEBHOOK")

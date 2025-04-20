@@ -1,6 +1,12 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, countDistinct, count
 from pyspark.sql.types import NumericType
+
+from dotenv import load_dotenv
 
 import psycopg2
 import uuid
@@ -12,8 +18,10 @@ from backend.config import DB_CONFIG
 from schema_checker import *
 
 def spark_session():
+    jar_path = os.path.abspath("lib/postgresql-42.7.5.jar")
     return SparkSession.builder \
         .appName("ProjectZProfiler") \
+        .config("spark.jars", jar_path) \
         .getOrCreate()
 
 def profile_table(table_df):
@@ -51,15 +59,17 @@ def profile_table(table_df):
 
 
 def read_postgres_table(spark, table_name):
-    from backend.config import DB_CONFIG
-    jdbc_url = f"jdbc:postgresql://{DB_CONFIG['host']}:{DB_CONFIG['port']}/{DB_CONFIG['dbname']}"
+    jdbc_url = f"jdbc:postgresql://{DB_CONFIG['POSTGRES_HOST']}:{DB_CONFIG['POSTGRES_PORT']}/{DB_CONFIG['POSTGRES_DB']}"
+
+    if not all([DB_CONFIG['POSTGRES_USER'], DB_CONFIG['POSTGRES_PASSWORD'], jdbc_url, table_name]):
+        raise ValueError("Missing DB credentials or table name")
 
     df = spark.read \
         .format("jdbc") \
         .option("url", jdbc_url) \
         .option("dbtable", table_name) \
-        .option("user", DB_CONFIG['user']) \
-        .option("password", DB_CONFIG['password']) \
+        .option("user", DB_CONFIG['POSTGRES_USER']) \
+        .option("password", DB_CONFIG['POSTGRES_PASSWORD']) \
         .option("driver", "org.postgresql.Driver") \
         .load()
     return df
@@ -69,16 +79,21 @@ if __name__ == "__main__":
     spark = spark_session()
 
     #--- CASE 1: Profile CSV file ---
-    df = spark.read.format("csv").option("header", "true").load("your_data.csv")
-    datasource = "csv"
-    table_name = "your_data.csv"
+    # df = spark.read.format("csv").option("header", "true").load("your_data.csv")
+    # datasource = "csv"
+    # table_name = "your_data.csv"
 
     # --- CASE 2: Profile PostgreSQL Table ---
-    jdbc_url = "jdbc:postgresql://localhost:5432/project_z"
-    user = "your_username"
-    password = "your_password"
-    table_name = "your_table_name"
-    df = read_postgres_table(spark, jdbc_url, table_name, user, password)
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    table_name = os.getenv("TARGET_TABLE")
+
+    jdbc_url = f"jdbc:postgresql://{db_host}:{db_port}/{db_name}"
+
+    df = read_postgres_table(spark,table_name)
     datasource = "postgresql"
 
     run_id = str(uuid.uuid4())

@@ -1,4 +1,3 @@
-psycopg2
 python-dotenv
 fastapi
 uvicorn[standard]
@@ -14,7 +13,7 @@ loguru
 pytest
 
 # Airflow (optional – include only if using Airflow locally)
-# apache-airflow==2.7.3  # uncomment if needed
+apache-airflow  # uncomment if needed
 
 # PySpark (used outside Docker in spark_profiler.py)
 pyspark
